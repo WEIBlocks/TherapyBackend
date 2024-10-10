@@ -1,0 +1,27 @@
+{
+	"name": "api",
+	"version": "1.0.0",
+	"description": "",
+	"main": "app.js",
+	"type": "module",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"dev": "nodemon app.js"
+	},
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"@solana/spl-token": "^0.4.8",
+		"@solana/web3.js": "^1.95.3",
+		"axios": "^1.7.7",
+		"bs58": "^6.0.0",
+		"cors": "^2.8.5",
+		"dotenv": "^16.4.5",
+		"express": "^4.21.0",
+		"mongoose": "^8.7.0",
+		"node-cron": "^3.0.3",
+		"nodemon": "^3.1.7",
+		"p-retry": "^6.2.0",
+		"tweetnacl": "^1.0.3"
+	}
+}

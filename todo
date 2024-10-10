@@ -1,0 +1,12 @@
+save transaction hash and user wallet address in database
+transfer status = pending
+
+transfer status = success
+
+transfer status = failed
+
+manage signature also send from frontend and decode it on backend
+
+also I want to make a function which will manage a failed transaction I will make a database entry of failed transaction if any transaction failed I will call it after 10 minutes and process
+
+add signature
