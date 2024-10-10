@@ -296,6 +296,7 @@ app.post("/send-tokens", async (req, res) => {
 			.json({ message: "An error occurred", error: error.message });
 	}
 });
+app.get("/", (req, res) => res.send("Hello World!"));
 
 cron.schedule("*/10 * * * *", async () => {
 	console.log("Running cron job");
