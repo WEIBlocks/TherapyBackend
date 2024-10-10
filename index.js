@@ -34,13 +34,14 @@ app.use(express.json());
 app.use(cors({ origin: "*" }));
 
 const _rpc = `https://mainnet.helius-rpc.com/?api-key=1594af8d-9d2e-4bad-8feb-ff8678480d91`; //mainnet
+// const _rpc = `https://api.devnet.solana.com`; //dev
 const connection = new Connection(_rpc);
-const tokenMintAddress = new PublicKey(
-	"mX8c9EF1Sq7CAiBd9H3FQ6LUnKFqheWNSayVTi2rBrb"
-);
-const privateKey = process.env.SOLANA_PRIVATE_KEY;
-const pkInBytes = bs58.decode(privateKey);
-const feePayer = Keypair.fromSecretKey(pkInBytes);
+// const tokenMintAddress = new PublicKey(
+// 	"mX8c9EF1Sq7CAiBd9H3FQ6LUnKFqheWNSayVTi2rBrb"
+// );
+// const privateKey = process.env.SOLANA_PRIVATE_KEY;
+// const pkInBytes = bs58.decode(privateKey);
+// const feePayer = Keypair.fromSecretKey(pkInBytes);
 const receiver = "8e25U3kPaAxKS55qz1HiJGp8Dy5HyYPtgjtLwWYut9N1"; // change this to the receiver's wallet address
 let solanaUsdPrice = 0;
 async function getOrCreateAssociatedTokenAccount(
@@ -151,62 +152,62 @@ async function transferTokens(toPublicKey, transactionHash, signature) {
 		// Calculate the number of tokens to send
 		const usdAmount = Number(solanaAmount) * Number(solanaUsdPrice);
 		const tokensToSend = usdAmount / 0.0001;
-		const tokenInLamports = (Number(tokensToSend) * 10 ** 8).toFixed(0);
-		const toTokenAccount = await getOrCreateAssociatedTokenAccount(
-			connection,
-			feePayer,
-			tokenMintAddress,
-			toPublicKey
-		);
-		console.log("toTokenAccount", toTokenAccount.address.toBase58());
+		// const tokenInLamports = (Number(tokensToSend) * 10 ** 8).toFixed(0);
+		// const toTokenAccount = await getOrCreateAssociatedTokenAccount(
+		// 	connection,
+		// 	feePayer,
+		// 	tokenMintAddress,
+		// 	toPublicKey
+		// );
+		// console.log("toTokenAccount", toTokenAccount.address.toBase58());
 
-		const fromTokenAccount = await getOrCreateAssociatedTokenAccount(
-			connection,
-			feePayer,
-			tokenMintAddress,
-			feePayer.publicKey
-		);
-		console.log("fromTokenAccount", fromTokenAccount.address.toBase58());
-		let Token_wallet_address = new PublicKey(fromTokenAccount.address);
+		// const fromTokenAccount = await getOrCreateAssociatedTokenAccount(
+		// 	connection,
+		// 	feePayer,
+		// 	tokenMintAddress,
+		// 	feePayer.publicKey
+		// );
+		// console.log("fromTokenAccount", fromTokenAccount.address.toBase58());
+		// let Token_wallet_address = new PublicKey(fromTokenAccount.address);
 
-		const info = await getAccount(connection, Token_wallet_address);
-		const amount1 = Number(info.amount);
-		// const mint = await getMint(connection, info.mint);
-		const balance = amount1;
-		console.log("balance", balance);
-		if (Number(tokenInLamports) > balance) {
-			return res.status(400).json({ message: "Insufficient balance" });
-		}
+		// const info = await getAccount(connection, Token_wallet_address);
+		// const amount1 = Number(info.amount);
+		// // const mint = await getMint(connection, info.mint);
+		// const balance = amount1;
+		// console.log("balance", balance);
+		// if (Number(tokenInLamports) > balance) {
+		// 	return res.status(400).json({ message: "Insufficient balance" });
+		// }
 
-		const transaction = new Transaction().add(
-			createTransferInstruction(
-				fromTokenAccount.address,
-				toTokenAccount.address,
-				feePayer.publicKey,
-				Number(tokenInLamports),
-				[],
-				TOKEN_PROGRAM_ID
-			)
-		);
+		// const transaction = new Transaction().add(
+		// 	createTransferInstruction(
+		// 		fromTokenAccount.address,
+		// 		toTokenAccount.address,
+		// 		feePayer.publicKey,
+		// 		Number(tokenInLamports),
+		// 		[],
+		// 		TOKEN_PROGRAM_ID
+		// 	)
+		// );
 
-		const latestBlockHash = await connection.getLatestBlockhash();
-		transaction.recentBlockhash = latestBlockHash.blockhash;
-		transaction.feePayer = feePayer.publicKey;
+		// const latestBlockHash = await connection.getLatestBlockhash();
+		// transaction.recentBlockhash = latestBlockHash.blockhash;
+		// transaction.feePayer = feePayer.publicKey;
 
-		const signature = await pRetry(
-			async () => {
-				const sig = await sendAndConfirmTransaction(connection, transaction, [
-					feePayer,
-				]);
-				await connection.confirmTransaction({
-					signature: sig,
-					lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
-					blockhash: latestBlockHash.blockhash,
-				});
-				return sig;
-			},
-			{ retries: 10 }
-		);
+		// const signature = await pRetry(
+		// 	async () => {
+		// 		const sig = await sendAndConfirmTransaction(connection, transaction, [
+		// 			feePayer,
+		// 		]);
+		// 		await connection.confirmTransaction({
+		// 			signature: sig,
+		// 			lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
+		// 			blockhash: latestBlockHash.blockhash,
+		// 		});
+		// 		return sig;
+		// 	},
+		// 	{ retries: 10 }
+		// );
 
 		const newTransaction = new TransactionMongo({
 			userWallet: toPublicKey.toBase58(),
@@ -226,7 +227,7 @@ async function transferTokens(toPublicKey, transactionHash, signature) {
 		});
 		if (!existingFailedTransaction) {
 			const failedTransaction = new FailedTransaction({
-				userWallet: feePayer.publicKey.toBase58(),
+				userWallet: toPublicKey.toBase58(),
 				transactionHash: transactionHash,
 				signature: signature,
 				solanaAmount: solanaAmount,
@@ -261,6 +262,14 @@ app.post("/send-tokens", async (req, res) => {
 		const existingTransaction = await TransactionMongo.findOne({
 			transactionHash,
 		});
+		const existingFailedTransaction = await FailedTransaction.findOne({
+			transactionHash,
+		});
+		if (existingFailedTransaction) {
+			return res
+				.status(400)
+				.json({ error: "You will recieve your tokens soon" });
+		}
 		if (existingTransaction) {
 			return res.status(400).json({ error: "Transaction already processed" });
 		}
@@ -297,6 +306,34 @@ app.post("/send-tokens", async (req, res) => {
 	}
 });
 app.get("/", (req, res) => res.send("Hello World!"));
+
+app.get("/user-balance", async (req, res) => {
+	try {
+		// Extract userWallet from query parameters
+		const { address } = req.query;
+
+		// Validate that userWallet is provided
+		if (!address) {
+			return res.status(400).json({ message: "Address is required" });
+		}
+
+		const transactions = await TransactionMongo.find({ userWallet: address });
+		if (transactions.length === 0) {
+			return res.status(200).json({ balance: 0 });
+		}
+		const balance = transactions.reduce(
+			(sum, transaction) => sum + transaction.tokenSent,
+			0
+		);
+
+		res.status(200).json({ balance });
+	} catch (error) {
+		console.error(error);
+		res
+			.status(500)
+			.json({ message: "An error occurred", error: error.message });
+	}
+});
 
 cron.schedule("*/10 * * * *", async () => {
 	console.log("Running cron job");
