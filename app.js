@@ -33,15 +33,15 @@ const app = express();
 app.use(express.json());
 app.use(cors({ origin: "*" }));
 
-const _rpc = `https://devnet.helius-rpc.com/?api-key=61c40795-c670-4002-a64a-0bfb48c6f355`; //devnet
+const _rpc = `https://mainnet.helius-rpc.com/?api-key=1594af8d-9d2e-4bad-8feb-ff8678480d91`; //mainnet
 const connection = new Connection(_rpc);
 const tokenMintAddress = new PublicKey(
-	"44cRHkDBmCUfzDHYNMZnVxMxR9k4W7rk8jfubEKnHevK"
+	"mX8c9EF1Sq7CAiBd9H3FQ6LUnKFqheWNSayVTi2rBrb"
 );
 const privateKey = process.env.SOLANA_PRIVATE_KEY;
 const pkInBytes = bs58.decode(privateKey);
 const feePayer = Keypair.fromSecretKey(pkInBytes);
-const receiver = "2DG2dYw1r4bhHiaANYkKbQvsqz8PVmz5j2WqzUJANek4";
+const receiver = "2DG2dYw1r4bhHiaANYkKbQvsqz8PVmz5j2WqzUJANek4"; // change this to the receiver's wallet address
 let solanaUsdPrice = 0;
 async function getOrCreateAssociatedTokenAccount(
 	connection,
@@ -78,7 +78,7 @@ async function getOrCreateAssociatedTokenAccount(
 		);
 		return account;
 	} catch (error) {
-		console.log("catch");
+		console.log("No Associate account found, creating one");
 		try {
 			const transaction = new Transaction().add(
 				createAssociatedTokenAccountInstruction(
@@ -93,7 +93,6 @@ async function getOrCreateAssociatedTokenAccount(
 			const blockHash = await connection.getLatestBlockhash();
 			transaction.feePayer = payer.publicKey;
 			transaction.recentBlockhash = blockHash.blockhash;
-			console.log("\nSigning\n");
 			const signature = await sendAndConfirmTransaction(
 				connection,
 				transaction,
