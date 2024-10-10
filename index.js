@@ -41,7 +41,7 @@ const tokenMintAddress = new PublicKey(
 const privateKey = process.env.SOLANA_PRIVATE_KEY;
 const pkInBytes = bs58.decode(privateKey);
 const feePayer = Keypair.fromSecretKey(pkInBytes);
-const receiver = "2DG2dYw1r4bhHiaANYkKbQvsqz8PVmz5j2WqzUJANek4"; // change this to the receiver's wallet address
+const receiver = "8e25U3kPaAxKS55qz1HiJGp8Dy5HyYPtgjtLwWYut9N1"; // change this to the receiver's wallet address
 let solanaUsdPrice = 0;
 async function getOrCreateAssociatedTokenAccount(
 	connection,
@@ -379,7 +379,9 @@ app.listen(PORT, () => {
 			useUnifiedTopology: true,
 		})
 		.then(() => {
-			console.log("Connected to MongoDB and using/created db TherapyDogCoin");
+			console.log(
+				`Connected to MongoDB and using/created db TherapyDogCoin on port ${PORT}`
+			);
 		})
 		.catch((error) => {
 			console.error("Error connecting to MongoDB:", error.message);
