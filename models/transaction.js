@@ -29,6 +29,10 @@ const transactionSchema = new mongoose.Schema({
 		type: String,
 		required: true,
 	},
+	tokenTransfer: {
+		type: String,
+		required: true,
+	},
 });
 
 const TransactionMongo = mongoose.model("Transaction", transactionSchema);

@@ -217,6 +217,7 @@ async function transferTokens(toPublicKey, transactionHash, signature) {
 			timeOfTransaction: transactionTime,
 			amountInUSD: usdAmount,
 			transactionStatus: "success",
+			tokenTransfer: "pending",
 		});
 
 		await newTransaction.save();
@@ -366,6 +367,7 @@ cron.schedule("*/10 * * * *", async () => {
 					timeOfTransaction: new Date(),
 					amountInUSD: solanaAmount * solanaUsdPrice, // Assuming solanaUsdPrice is available
 					transactionStatus: "success",
+					tokenTransfer: "pending",
 				});
 
 				await newTransaction.save();
